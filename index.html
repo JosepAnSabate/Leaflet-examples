@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet repas</title>
+    <!-- leaflet css  -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+        }
+        #map{
+            width: 100%;
+            height: 100vh;
+        }
+        .coordinate {
+            position: absolute;
+            bottom: 50px;
+            right: 40%;
+        }
+
+        .leaflet-popup-content-wrapper {
+            background-color: #000000;
+            color: #fff;
+            border: 1px solid red;
+            border-radius: 0px;
+        }
+    </style>
+</head>
+<body>
+    <div id="map">
+        <div class="leaflet-control coordinate"></div>
+    </div>
+    
+</body>
+</html>
+<!-- leaflet js -->
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="./data/points.js"></script>
+<script src="./data/lines.js"></script>
+<script src="./data/pol.js"></script>
+<script>
+    // map innitialization 
+    var map = L.map('map').setView([41.398188, 2.178726], 12);
+    // osm layer
+    var osm =  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    });
+    osm.addTo(map)
+    // Terrain
+    var  openTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+	maxZoom: 17,
+	attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+    });
+    openTopoMap.addTo(map)
+
+    // Esri_DeLorme 
+    var Esri_DeLorme = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Specialty/DeLorme_World_Base_Map/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; Copyright: &copy;2012 DeLorme',
+	minZoom: 1,
+	maxZoom: 11
+    });
+    Esri_DeLorme.addTo(map)
+    var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    });
+    Esri_WorldImagery.addTo(map)
+    var WaymarkedTrails_slopes = L.tileLayer('https://tile.waymarkedtrails.org/slopes/{z}/{x}/{y}.png', {
+	maxZoom: 18,
+	attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | Map style: &copy; <a href="https://waymarkedtrails.org">waymarkedtrails.org</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+});
+WaymarkedTrails_slopes.addTo(map)
+// wms
+var wms = L.tileLayer.wms("http://localhost:8080/geoserver/demo/wms?",{
+    layers: 'demo:vacunesxcent',
+    format: 'image/png',
+    transparent: true,
+    attribution: 'Propi',
+})
+
+// markers
+var singleMarker = L.marker([41.398188, 2.178726]).addTo(map)
+var popup = singleMarker.bindPopup('Estatua Miró.<br> La dona ocell');
+popup.addTo(map)
+// marker to geojson
+console.log(singleMarker.toGeoJSON())
+
+
+// geojson-> canviar estensio a js i afegir la var corresponent
+// L.geoJSON(pointJson).addTo(map);
+var lineData = L.geoJSON(lineJson).addTo(map);
+var polygonData = L.geoJSON(polygonJson, {
+    onEachFeature: function(feature, layer){
+        layer.bindPopup('<b>Name: </b>' + feature.properties.name)
+    },
+    style: {  // path leaflet doc
+        fillColor: 'red',
+        fillOpacity: 0.6,
+        color: '#e6e600',
+    }
+}).addTo(map);
+
+//Layer control
+var baseMaps = {
+    "OSM": osm,
+    "Esri_WorldImagery": Esri_WorldImagery,
+    'Esri_DeLorme': Esri_DeLorme,
+    'openTopo': openTopoMap
+};
+//markers
+var overlayMaps = {
+    "Marker-1": singleMarker,
+    'Polygon data': polygonData,
+    'Line data':lineData,
+    'vector data wms': wms
+};
+
+L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+// leaflet events
+map.on('mouseover', function () {
+        console.log('your mouse is over the map')
+    })
+
+map.on('mousemove', function (e) {
+    document.getElementsByClassName('coordinate')[0].innerHTML = 'lat: ' + e.latlng.lat + 'lng: ' + e.latlng.lng;
+    console.log('lat: ' + e.latlng.lat, 'lng: ' + e.latlng.lng)
+})
+
+
+
+</script>
