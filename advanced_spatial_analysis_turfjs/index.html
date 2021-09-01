@@ -20,8 +20,8 @@
             height: 100vh;
         }
 
-        .leaflet-popup-content {
-            width: 600px;
+        .leaflet-popup-content {          /* alterrar css turf*/
+            width: 600px !important; /* !importantoverwrite */
         }
     </style>
 </head>
@@ -55,8 +55,9 @@
             area = (turf.area(feature) / 1000000).toFixed(2);
             center_lat = turf.center(feature).geometry.coordinates[1]
             center_long = turf.center(feature).geometry.coordinates[0]
-            bbox = turf.bbox(feature).toString();
-            layer.bindPopup(`<b>Area: </b> ${area} </br> <b>Center(x,y): </b> (${center_long, center_lat}) </br> <b>Bbox: </b> [${bbox}]`)
+            bbox = turf.bbox(feature).toString(); // boundingbox
+            layer.bindPopup(`<b>Area: </b> ${area} </br> <b>Center(x,y): </b> (
+                ${center_long, center_lat}) </br> <b>Bbox: </b> [${bbox}]`)
         }
     });
     var nepalHq = L.geoJSON(hqData, {
@@ -64,7 +65,7 @@
             var buffered = turf.buffer(feature, 5, { units: 'kilometers' });
             L.geoJSON(buffered, {
                 onEachFeature: function (feature, layer) {
-                    layer.bindPopup(`This area is nearby HQ. (Buffer distance: 5)`)
+                    layer.bindPopup(`This area is nearby HQ. (Buffer distance: 5km)`)
                 }
             }).addTo(map)
         }
@@ -87,15 +88,17 @@
 
     //Turf creating geometry (GeoJSON)
     var point = turf.multiPoint([[84.1240, 28.3949], [83.1240, 29.3949]])
-    // L.geoJSON(point).addTo(map)
+    L.geoJSON(point).addTo(map)
 
     var linestring1 = turf.lineString([[-24, 63], [-23, 60], [-25, 65], [-20, 69]], { name: 'line 1' });
     var linestring2 = turf.lineString([[-14, 43], [-13, 40], [-15, 45], [-10, 49]], { name: 'line 2' });
-    // var linestring1Geojson = L.geoJSON(linestring1).addTo(map)
+    var linestring1Geojson = L.geoJSON(linestring1).addTo(map)
+    // map.fitBounds(linestring1Geojson.getBounds())
 
     var polygon = turf.polygon([[[-5, 52], [-4, 56], [-2, 51], [-7, 54], [-5, 52]]], { name: 'poly1' });
-    // var polygonGeojson = L.geoJSON(polygon).addTo(map)
-
+    var polygonGeojson = L.geoJSON(polygon).addTo(map)
+   // map.fitBounds(polygonGeojson.getBounds())
+    
     var points = turf.randomPoint(10, { bbox: [80, 20, 90, 30] })
 
     // var pointsGeojson = L.geoJSON(points).addTo(map)
@@ -106,8 +109,8 @@
 
     // map.fitBounds(pointsGeojson.getBounds())
 
-    //Buffer 
 
+    //Buffer 
 
     var polygon1 = turf.polygon([[
         [128, -26],
@@ -145,7 +148,7 @@
     // console.log(difference)
 
     var pt = turf.point([-7903683.846322424, 5012341.663847514]);
-    var converted = turf.toMercator(pt);
+    var converted = turf.toMercator(pt);   
+   
     console.log(converted)
-
 </script>
